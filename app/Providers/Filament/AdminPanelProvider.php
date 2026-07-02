@@ -98,9 +98,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => __('admin.navigation.recruitment'))
                     ->icon('icon-recruitments'),
                 NavigationGroup::make()
-                    ->label(fn (): string => __('admin.navigation.website'))
-                    ->icon('icon-website'),
-                NavigationGroup::make()
                     ->label(fn (): string => __('admin.navigation.barcode'))
                     ->icon('icon-barcode'),
                 NavigationGroup::make()
