@@ -13,14 +13,18 @@ $clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
 
 $allowedIps = ['127.0.0.1', '::1'];
 
-// Docker Desktop (Mac/Windows) shows host-originated requests as its
-// internal gateway IP, not 127.0.0.1. Resolve it dynamically rather than
-// hardcoding it, since it can change across Docker Desktop versions/restarts.
-// On a real server with no Docker involved, this resolution just fails and
-// falls back to strict loopback-only, which is the correct behavior there.
-$dockerHostIp = @gethostbyname('host.docker.internal');
-if ($dockerHostIp !== 'host.docker.internal') {
-    $allowedIps[] = $dockerHostIp;
+// Docker Desktop's gateway addresses for the machine running this container.
+// Inbound host->container requests (via published ports) and outbound
+// container->host DNS resolution (host.docker.internal) can report
+// *different* addresses in the same internal range, so both are listed
+// rather than resolved dynamically from just one of them.
+$allowedIps[] = '192.168.65.1';
+$allowedIps[] = '192.168.65.254';
+
+// Escape hatch for setups where none of the above matches (e.g. a different
+// Docker network layout): set ADMINER_ALLOWED_IPS to a comma-separated list.
+if ($extra = getenv('ADMINER_ALLOWED_IPS')) {
+    $allowedIps = [...$allowedIps, ...array_map('trim', explode(',', $extra))];
 }
 
 if (! in_array($clientIp, $allowedIps, true)) {
